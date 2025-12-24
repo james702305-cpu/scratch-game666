@@ -144,20 +144,21 @@
 
         function drawCover() {
             ctx.fillStyle = '#B22222';
-    ctx.fillRect(0, 0, 300, 400);
+            ctx.fillRect(0, 0, 300, 400);
 
-    var img = new Image();
-    // 即使它是 PNG，只要 GitHub 上檔名是 cover.jpg，這裡就寫 cover.jpg
-    img.src = 'cover.jpg'; 
+            var img = new Image();
+            // 修改這裡：根據你 GitHub 上的真實檔名修改
+            // 經過檢查，你的檔案全名應該是 'cover.jpg.png'
+            img.src = 'cover.jpg.png?t=' + new Date().getTime(); 
 
-    img.onload = function() {
-        ctx.drawImage(img, 0, 0, 300, 400);
-    };
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0, 300, 400);
+            };
 
-    img.onerror = function() {
-        // 如果還是失敗，嘗試強制指定它可能是 png 的路徑
-        console.error("圖片載入失敗，請確認 GitHub 上的副檔名");
-    };
+            img.onerror = function() {
+                // 如果之後你把檔名改正確了，這行可以幫你偵測
+                console.error("圖片載入失敗，目前的檔名嘗試為: cover.jpg.png");
+            };
         }
 
         // 3. 刮刮與跳轉邏輯 (傳統事件)
@@ -196,5 +197,6 @@
 </body>
 
 </html>
+
 
 
