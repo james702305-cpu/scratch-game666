@@ -130,12 +130,15 @@
             displayName.innerText = name;
             displayCode.innerText = code;
             document.getElementById('loading-overlay').style.display = 'none';
+
+            // 修改重點：無論是不是舊玩家(isOld)，都呼叫 drawCover() 讓畫布出現
+            drawCover();
+
             if (isOld) {
-                canvas.style.display = 'none';
-                claimBtn.style.display = 'block';
-                document.getElementById('status-msg').innerText = "⚠️ 您已領過獎囉！";
+                // 如果是舊玩家，僅顯示提示文字，但不隱藏畫布
+                document.getElementById('status-msg').innerText = "⚠️ 您之前已領過獎（獎項不變），歡迎重新體驗刮獎！";
             } else {
-                drawCover();
+                document.getElementById('status-msg').innerText = "請用力刮開財神爺！";
             }
         }
 
@@ -193,4 +196,5 @@
 </body>
 
 </html>
+
 
