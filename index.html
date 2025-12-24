@@ -140,24 +140,20 @@
         }
 
         function drawCover() {
-            // 1. 繪製一個保底的紅色背景（防止圖片載入失敗時一片空白）
-    ctx.fillStyle = '#B22222';
+            ctx.fillStyle = '#B22222';
     ctx.fillRect(0, 0, 300, 400);
 
-    // 2. 建立圖片物件
     var img = new Image();
-    
-    // 3. 設定圖片來源為你上傳的檔案名稱 (務必確認 GitHub 上檔名是 cover.jpg)
+    // 即使它是 PNG，只要 GitHub 上檔名是 cover.jpg，這裡就寫 cover.jpg
     img.src = 'cover.jpg'; 
 
-    // 4. 當圖片下載完成後，畫到畫布上
     img.onload = function() {
         ctx.drawImage(img, 0, 0, 300, 400);
     };
 
-    // 5. 錯誤偵測（選配）
     img.onerror = function() {
-        console.error("找不到 cover.jpg，請確認檔案已上傳至 GitHub");
+        // 如果還是失敗，嘗試強制指定它可能是 png 的路徑
+        console.error("圖片載入失敗，請確認 GitHub 上的副檔名");
     };
         }
 
@@ -197,3 +193,4 @@
 </body>
 
 </html>
+
