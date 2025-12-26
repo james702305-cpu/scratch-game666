@@ -3,64 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>財神爺刮刮樂-終極穩健版</title>
+    <title>財神爺刮刮樂-仿真鎖定版</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
     <style>
-       :root { --gold: #D4AF37; --red: #B22222; }
-    body { background: #222; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-    
-    /* 1. 主容器：讓刮刮樂跟規則並排 */
-    .main-container {
-        display: flex;
-        flex-direction: row; /* 水平排列 */
-        align-items: flex-start;
-        gap: 30px; /* 兩者之間的間距 */
-        max-width: 850px;
-        width: 100%;
-        justify-content: center;
-        margin-top: 20px;
-    }
-
-    /* 2. 刮刮樂本體 */
-    .scratch-card { position: relative; width: 300px; height: 400px; background: var(--gold); padding: 10px; border-radius: 15px; overflow: hidden; flex-shrink: 0; }
-    
-    /* 3. 右側規則欄 */
-    .rules-container {
-        background: rgba(255, 255, 255, 0.05); /* 半透明背景 */
-        padding: 20px;
-        border-radius: 15px;
-        border-left: 5px solid var(--gold); /* 左側金色裝飾條 */
-        text-align: left;
-        width: 300px;
-        box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
-    }
-
-    .rules-container h3 { color: var(--gold); margin-top: 0; border-bottom: 1px solid #444; padding-bottom: 10px; }
-    .rules-container ol { padding-left: 20px; line-height: 1.8; font-size: 15px; color: #eee; }
-    .rules-container li { margin-bottom: 8px; }
-
-    /* 4. 原有的中獎層與畫布樣式 */
-    .prize-layer { position: absolute; inset: 10px; background: #fff; border-radius: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--red); z-index: 1; text-align: center; }
-    .prize-amount { font-size: 2rem; font-weight: bold; margin: 10px 0; }
-    .verify-box { font-size: 11px; color: #999; border: 1px dashed #ccc; padding: 5px; background: #fafafa; }
-    #scratch-canvas { position: absolute; top: 10px; left: 10px; z-index: 5; cursor: crosshair; touch-action: none; border-radius: 10px; }
-    
-    /* 5. 按鈕與載入中 */
-    #claim-btn { display: none; margin-top: 30px; padding: 15px 40px; background: gold; border: none; font-weight: bold; cursor: pointer; border-radius: 5px; color: #8B0000; font-size: 18px; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3); }
-    #loading-overlay { position: absolute; inset: 10px; background: rgba(255,255,255,0.9); z-index: 100; display: flex; align-items: center; justify-content: center; color: #333; border-radius: 10px; font-weight: bold; }
-
-    /* 6. 手機版適應：螢幕太窄時自動變成上下排列 */
-    @media (max-width: 700px) {
-        .main-container {
-            flex-direction: column;
-            align-items: center;
-        }
-        .rules-container {
-            width: 300px; /* 手機版維持跟刮刮樂一樣寬 */
-        }
-    }
+        :root { --gold: #D4AF37; --red: #B22222; }
+        body { background: #222; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; touch-action: manipulation; }
+        
+        .main-container { display: flex; flex-direction: row; align-items: flex-start; gap: 30px; max-width: 850px; width: 100%; justify-content: center; margin-top: 20px; }
+        .scratch-card { position: relative; width: 300px; height: 400px; background: var(--gold); padding: 10px; border-radius: 15px; overflow: hidden; flex-shrink: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .rules-container { background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 15px; border-left: 5px solid var(--gold); width: 300px; }
+        .prize-layer { position: absolute; inset: 10px; background: #fff; border-radius: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--red); z-index: 1; text-align: center; }
+        .prize-amount { font-size: 2.2rem; font-weight: bold; margin: 10px 0; }
+        #scratch-canvas { position: absolute; top: 10px; left: 10px; z-index: 5; cursor: crosshair; touch-action: none; border-radius: 10px; transition: opacity 0.6s; }
+        #claim-btn { display: none; margin-top: 30px; padding: 15px 40px; background: linear-gradient(45deg, #FFD700, #FFA500); border: none; font-weight: bold; cursor: pointer; border-radius: 50px; color: #8B0000; font-size: 18px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        #loading-overlay { position: absolute; inset: 10px; background: #fff; z-index: 100; display: flex; align-items: center; justify-content: center; color: #333; border-radius: 10px; font-weight: bold; }
+        @media (max-width: 700px) { .main-container { flex-direction: column; align-items: center; } }
     </style>
 </head>
 <body>
@@ -68,193 +28,168 @@
     <h2>🧧 財神到刮刮樂 🧧</h2>
 
     <div class="main-container">
-    <div class="scratch-card">
-        <div id="loading-overlay">載入中，請稍候...</div>
-        <div class="prize-layer">
-            <span>恭喜獲得</span>
-            <div class="prize-amount" id="display-name">---</div>
-            <div class="verify-box">驗證代碼：<span id="display-code">---</span></div>
+        <div class="scratch-card">
+            <div id="loading-overlay">正在恭請財神爺...</div>
+            <div class="prize-layer">
+                <span style="font-size: 1rem; color: #666;">恭喜獲得</span>
+                <div class="prize-amount" id="display-name">---</div>
+                <div style="font-size: 11px; color: #999; border: 1px dashed #ccc; padding: 5px;">驗證碼：<span id="display-code">---</span></div>
+            </div>
+            <canvas id="scratch-canvas" width="300" height="400"></canvas>
         </div>
-        <canvas id="scratch-canvas" width="300" height="400"></canvas>
+
+        <div class="rules-container">
+            <h3>📜 遊戲規則說明</h3>
+            <ol>
+                <li>每人限參加乙次，系統將自動鎖定獎項。</li>
+                <li>請刮開財神爺顯示獎項，刮開 40% 即自動顯示。</li>
+                <li>中獎後請點擊下方按鈕領取。</li>
+                <li>※請私訊賣家您的蝦皮帳號與金額※。</li>
+            </ol>
+        </div>
     </div>
 
-    <div class="rules-container">
-        <h3>📜 遊戲規則說明</h3>
-        <ol>
-            <li>每人限參加乙次，系統將自動鎖定獲獎資格。</li>
-            <li>請用力刮開金元寶，顯示獎項後點擊領取按鈕。</li>
-            <li>中獎後請務必完整填寫 Google 表單以利兌獎。</li>
-            <li>※填好表單後請私訊通知賣家，要使用的折價卷金額和蝦皮帳號※。</li>
-            <li>代碼與獎項經過加密，請勿自行修改以免失效。</li>
-            <li>主辦單位保有活動最終解釋權。</li>
-        </ol>
-    </div>
-</div>
+    <button id="claim-btn">點我領取獎項</button>
+    <p id="status-msg" style="color: gold; margin-top: 15px; font-weight: bold;">載入中...</p>
 
-<button id="claim-btn">點我領取獎項</button>
     <script>
-        // 1. 設定區
-        var firebaseConfig = {
+        // 1. 配置
+        const firebaseConfig = {
             apiKey: "AIzaSyCLAJqUYGVFRnS0randoKFhyMW4Wx0YoOw",
             databaseURL: "https://my-scratch-game-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "my-scratch-game",
         };
+        const GOOGLE_FORM = "https://docs.google.com/forms/d/e/1FAIpQLSfs2Z_ASJ5sp9OlXARf5ePyll9iiLqhAC2F6mcntabK7mQNcA/viewform?usp=pp_url";
+        const SECRET = "LUCKY_2025";
 
-        var GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfs2Z_ASJ5sp9OlXARf5ePyll9iiLqhAC2F6mcntabK7mQNcA/viewform?usp=pp_url"; 
-        var ENTRY_PRIZE = "entry.1938722113"; 
-        var ENTRY_CODE = "entry.695651720";
-        var MY_SECRET_KEY = "LUCKY_2025";
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const canvas = document.getElementById('scratch-canvas');
+        const ctx = canvas.getContext('2d');
 
-        // 初始化 Firebase (v8 語法更穩)
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        var db = firebase.database();
-
-        var canvas = document.getElementById('scratch-canvas');
-        var ctx = canvas.getContext('2d');
-        var displayName = document.getElementById('display-name');
-        var displayCode = document.getElementById('display-code');
-        var claimBtn = document.getElementById('claim-btn');
-
-        var prizes = [
+        const prizes = [
             { n: "500元折價卷", p: 0.05 },
             { n: "200元折價卷", p: 0.10 },
             { n: "100元折價卷", p: 0.30 },
             { n: "50元折價卷", p: 0.55 }
         ];
 
-        function generateHash(name) {
-            var str = name + MY_SECRET_KEY;
-            var hash = 0;
-            for (var i = 0; i < str.length; i++) {
-                hash = ((hash << 5) - hash) + str.charCodeAt(i);
-                hash |= 0;
-            }
+        function getHash(name) {
+            let str = name + SECRET, hash = 0;
+            for (let i = 0; i < str.length; i++) { hash = ((hash << 5) - hash) + str.charCodeAt(i); hash |= 0; }
             return Math.abs(hash).toString(36).toUpperCase();
         }
 
-        // 2. 核心遊戲邏輯
+        // 2. 核心鎖定邏輯
         async function start() {
-            var vid = "guest_" + Math.floor(Math.random()*1000);
-            
+            // A. 先看手機有沒有鎖定紀錄 (最優先，防止刷新獎項)
+            const lock = localStorage.getItem('prize_lock_final');
+            if (lock) {
+                const data = JSON.parse(lock);
+                render(data.name, data.code, true);
+                return;
+            }
+
             try {
-                // 嘗試取得設備指紋
+                // B. 沒鎖定才連資料庫
                 const fp = await FingerprintJS.load();
                 const result = await fp.get();
-                vid = result.visitorId;
+                const vid = result.visitorId;
 
-                // 嘗試讀取 Firebase (設定 3 秒必解鎖)
-                var timeout = setTimeout(showGame, 3000); 
-                
-                db.ref('players/' + vid).once('value').then((snapshot) => {
-                    clearTimeout(timeout);
-                    if (snapshot.exists()) {
-                        var data = snapshot.val();
+                db.ref('players/' + vid).once('value').then((snap) => {
+                    if (snap.exists()) {
+                        const data = snap.val();
+                        localStorage.setItem('prize_lock_final', JSON.stringify(data));
                         render(data.name, data.code, true);
                     } else {
-                        showGame(vid);
+                        drawNew(vid);
                     }
-                }).catch(e => {
-                    console.error(e);
-                    showGame(vid);
-                });
-
-            } catch (e) {
-                console.warn("備援模式開啟");
-                showGame(vid);
-            }
+                }).catch(() => drawNew("guest_" + Date.now()));
+            } catch (e) { drawNew("guest_" + Date.now()); }
         }
 
-        function showGame(vid) {
-            var r = Math.random(), sum = 0, win = prizes[3];
-            for (var p of prizes) {
-                sum += p.p;
-                if (r <= sum) { win = p; break; }
-            }
-            var code = generateHash(win.n);
+        function drawNew(vid) {
+            const r = Math.random();
+            let sum = 0, win = prizes[3];
+            for (let p of prizes) { sum += p.p; if (r <= sum) { win = p; break; } }
+            const res = { name: win.n, code: getHash(win.n) };
             
-            // 寫入資料庫 (不等待)
-            if(vid.indexOf('guest') === -1) {
-                db.ref('players/' + vid).set({ name: win.n, code: code, time: Date.now() });
-            }
-            
-            render(win.n, code, false);
+            localStorage.setItem('prize_lock_final', JSON.stringify(res));
+            if (!vid.includes("guest")) db.ref('players/' + vid).set({ ...res, time: Date.now() });
+            render(res.name, res.code, false);
         }
 
         function render(name, code, isOld) {
-            displayName.innerText = name;
-            displayCode.innerText = code;
+            document.getElementById('display-name').innerText = name;
+            document.getElementById('display-code').innerText = code;
             document.getElementById('loading-overlay').style.display = 'none';
-
-            // 修改重點：無論是不是舊玩家(isOld)，都呼叫 drawCover() 讓畫布出現
-            drawCover();
-
-            if (isOld) {
-                // 如果是舊玩家，僅顯示提示文字，但不隱藏畫布
-                document.getElementById('status-msg').innerText = "⚠️ 您之前已領過獎（獎項不變），歡迎重新體驗刮獎！";
-            } else {
-                document.getElementById('status-msg').innerText = "請用力刮開財神爺！";
-            }
+            document.getElementById('status-msg').innerText = isOld ? "⚠️ 獎項已固定，歡迎繼續刮開！" : "🧧 財神駕到！請用力刮開！";
+            initCanvas();
         }
 
-        function drawCover() {
+        // 3. 仿真畫布與硬幣效果
+        function initCanvas() {
             ctx.fillStyle = '#B22222';
             ctx.fillRect(0, 0, 300, 400);
+            const img = new Image();
+            img.src = 'cover.jpg.png?t=' + Date.now();
+            img.onload = () => ctx.drawImage(img, 0, 0, 300, 400);
 
-            var img = new Image();
-            // 修改這裡：根據你 GitHub 上的真實檔名修改
-            // 經過檢查，你的檔案全名應該是 'cover.jpg.png'
-            img.src = 'cover.jpg.png?t=' + new Date().getTime(); 
-
-            img.onload = function() {
-                ctx.drawImage(img, 0, 0, 300, 400);
+            let drawing = false;
+            const pos = (e) => {
+                const r = canvas.getBoundingClientRect();
+                const t = e.touches ? e.touches[0] : e;
+                return { x: t.clientX - r.left, y: t.clientY - r.top };
             };
 
-            img.onerror = function() {
-                // 如果之後你把檔名改正確了，這行可以幫你偵測
-                console.error("圖片載入失敗，目前的檔名嘗試為: cover.jpg.png");
+            const scratch = (e) => {
+                if (!drawing) return;
+                const { x, y } = pos(e);
+                ctx.globalCompositeOperation = 'destination-out';
+                
+                // 仿真硬幣核心：大圓
+                ctx.beginPath();
+                ctx.arc(x, y, 20, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 仿真硬幣碎屑：隨機小點噴濺
+                for(let i=0; i<8; i++) {
+                    const ox = (Math.random() - 0.5) * 45;
+                    const oy = (Math.random() - 0.5) * 45;
+                    ctx.beginPath();
+                    ctx.arc(x + ox, y + oy, Math.random() * 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
             };
+
+            canvas.onmousedown = canvas.ontouchstart = (e) => { drawing = true; scratch(e); };
+            window.onmouseup = window.ontouchend = () => { drawing = false; check(); };
+            canvas.onmousemove = canvas.ontouchmove = scratch;
         }
 
-        // 3. 刮刮與跳轉邏輯 (傳統事件)
-        var isDrawing = false;
-        canvas.onmousedown = canvas.ontouchstart = function(e) { isDrawing = true; if(e.touches) e.preventDefault(); };
-        window.onmouseup = window.ontouchend = function() { isDrawing = false; check(); };
-        canvas.onmousemove = canvas.ontouchmove = function(e) {
-            if (!isDrawing) return;
-            var rect = canvas.getBoundingClientRect();
-            var t = e.touches ? e.touches[0] : e;
-            var x = t.clientX - rect.left;
-            var y = t.clientY - rect.top;
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.beginPath();
-            ctx.arc(x, y, 25, 0, Math.PI * 2);
-            ctx.fill();
-        };
-
         function check() {
-            var data = ctx.getImageData(0, 0, 300, 400).data;
-            var clear = 0;
-            for (var i = 3; i < data.length; i += 4) { if (data[i] === 0) clear++; }
-            if (clear / (data.length / 4) > 0.4) {
-                canvas.style.display = "none";
-                claimBtn.style.display = 'block';
+            const data = ctx.getImageData(0, 0, 300, 400).data;
+            let clear = 0;
+            // 跳步檢查提高效能
+            for (let i = 3; i < data.length; i += 32) { if (data[i] === 0) clear++; }
+            
+            if (clear / (data.length / 32) > 0.4) {
+                canvas.style.opacity = "0";
+                setTimeout(() => {
+                    canvas.style.display = "none";
+                    document.getElementById('claim-btn').style.display = 'block';
+                    document.getElementById('status-msg').innerText = "🎉 恭喜中獎！點擊按鈕領取獎項！";
+                }, 600);
             }
         }
 
-        claimBtn.onclick = function() {
-            var url = GOOGLE_FORM_URL + "&" + ENTRY_PRIZE + "=" + encodeURIComponent(displayName.innerText) + "&" + ENTRY_CODE + "=" + encodeURIComponent(displayCode.innerText);
-            window.location.href = url;
+        document.getElementById('claim-btn').onclick = () => {
+            const n = document.getElementById('display-name').innerText;
+            const c = document.getElementById('display-code').innerText;
+            location.href = `${GOOGLE_FORM}&entry.1938722113=${encodeURIComponent(n)}&entry.695651720=${encodeURIComponent(c)}`;
         };
 
         start();
     </script>
 </body>
-
 </html>
-
-
-
-
-
